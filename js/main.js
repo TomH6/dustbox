@@ -53,7 +53,7 @@ function bind(){
   $('#sClear').onclick=()=>{pushUndo();patterns[S.pat]=newPat();renderSeq();save();toast('Pattern cleared. Undo brings it back.')};
   $('#grid').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const pat=patterns[S.pat];
     if(b.dataset.mute){const id=b.dataset.mute;if(pat.mute[id])delete pat.mute[id];else pat.mute[id]=true;renderSeq();save();return}
-    if(b.dataset.c){const[id,i]=b.dataset.c.split(':').map(Number);gesture();const st=pat.steps[id]||(pat.steps[id]=Array(32).fill(0));st[i]=(st[i]+1)%3;b.className=`cell ${st[i]===1?'v1':st[i]===2?'v2':''} ${Math.floor(i/4)%2?'alt':''} ${SQ.cur===i?'now':''}`;if(st[i]&&pads[id]&&!S.playing)trigger(id,0,st[i]===2?.55:1);
+    if(b.dataset.c){const[id,i]=b.dataset.c.split(':').map(Number);gesture();const st=pat.steps[id]||(pat.steps[id]=Array(32).fill(0));st[i]=(st[i]+1)%4;b.className=`cell ${st[i]?'v'+st[i]:''} ${Math.floor(i/4)%2?'alt':''} ${SQ.cur===i?'now':''}`;if(st[i]&&pads[id]&&!S.playing){const t=ctx.currentTime;trigger(id,t,velOf(st[i]));if(st[i]===3)trigger(id,t+stepDur()/2,ROLL2)}
       $('#pats').querySelectorAll('button')[S.pat].classList.toggle('has',hasNotes(pat));save()}});
   $('#sSwing').addEventListener('input',e=>{S.swing=+e.target.value;$('#oSwing').textContent=S.swing+'%';save()});
   $('#sLoose').addEventListener('input',e=>{S.loose=+e.target.value;$('#oLoose').textContent=S.loose+' ms';save()});
