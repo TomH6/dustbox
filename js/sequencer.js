@@ -32,4 +32,4 @@ function renderSeq(){const pat=patterns[S.pat],vw=stepsView(),pages=pat.len/vw;i
 let lastMark=[];
 function markStep(){for(const c of lastMark)c.classList.remove('now');lastMark=SQ.cur<0?[]:[...document.querySelectorAll(`#grid [data-i="${SQ.cur}"]`)];for(const c of lastMark)c.classList.add('now')}
 function updTransport(){$('#play').textContent=S.playing?'Stop':'Play';$('#play').classList.toggle('on',S.playing);$('#recSeq').classList.toggle('on',S.rec);renderLcd()}
-function setBpm(v){S.bpm=clamp(Math.round(v*10)/10,40,220);$('#bpm').value=S.bpm;U.delay.apply();renderLcd();renderPadPanel();save()}
+function setBpm(v){S.bpm=clamp(Math.round(v*10)/10,40,220);retempoSoon();$('#bpm').value=S.bpm;U.delay.apply();renderLcd();renderPadPanel();save()}

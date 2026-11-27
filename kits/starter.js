@@ -1,5 +1,5 @@
 // Dustbox kit: the starter kit on bank A, with its beat on pattern 1. Every sound is synthesized here.
-addKit({name:'Starter',bank:0,pattern:0,keep:false,
+addKit({id:'starter',name:'Starter',bank:0,pattern:0,keep:false,
   pads(){
     const kick=synth(.6,(d,c,sr)=>{let ph=0;for(let i=0;i<d.length;i++){const t=i/sr,f=46+95*Math.exp(-t*30);ph+=2*Math.PI*f/sr;d[i]=Math.tanh(1.6*(Math.sin(ph)*Math.exp(-t*5.5)+rnd()*.25*Math.exp(-t*250)))*.9}});
     const snare=synth(.32,(d,c,sr)=>{let p=0;for(let i=0;i<d.length;i++){const t=i/sr,n=rnd(),h=n-p;p=n;d[i]=Math.tanh((Math.sin(2*Math.PI*185*t)*.55*Math.exp(-t*22)+(h*.45+n*.25)*Math.exp(-t*13))*1.4)*.85}});

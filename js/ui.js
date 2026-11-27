@@ -4,7 +4,7 @@ const UN=[],RE=[];let lastU=0;
 const snap=()=>({pads:pads.map(p=>p&&{...p}),pats:JSON.stringify(patterns)});
 function pushUndo(){UN.push(snap());if(UN.length>60)UN.shift();RE.length=0;updUndo()}
 function gesture(){const t=Date.now();if(t-lastU>800)pushUndo();lastU=t}
-function restore(s){pads=s.pads;patterns=JSON.parse(s.pats);renderAll();save()}
+function restore(s){pads=s.pads;patterns=JSON.parse(s.pats);retempo(true);renderAll();save()}
 function undo(){if(!UN.length)return;RE.push(snap());restore(UN.pop());toast('Undone')}
 function redo(){if(!RE.length)return;UN.push(snap());restore(RE.pop());toast('Redone')}
 function updUndo(){$('#undo').disabled=!UN.length;$('#redo').disabled=!RE.length}

@@ -21,4 +21,4 @@ async function loadProject(){const st=await dget('kv','project');if(!st||!st.pad
   if(Array.isArray(st.patterns))patterns=Array.from({length:8},(_,i)=>{const p=st.patterns[i];return p?{len:p.len===32?32:16,steps:p.steps||{},mute:p.mute||{}}:newPat()});
   Object.assign(S,st.S||{});if(Array.isArray(st.chain)&&st.chain.length===6&&st.chain.every(id=>U[id]))S.chain=st.chain;
   for(const id in st.fx||{})if(U[id]){Object.assign(U[id].p,st.fx[id].p);U[id].on=!!st.fx[id].on}
-  return true}
+  retempo(true);return true}
