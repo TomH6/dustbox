@@ -268,7 +268,8 @@ function buildUnits(){
       const o1=ctx.createOscillator(),g1=G(0),o2=ctx.createOscillator(),g2=G(0);o1.frequency.value=.55;o2.frequency.value=6.3;o1.connect(g1).connect(dl.delayTime);o2.connect(g2).connect(dl.delayTime);o1.start();o2.start();
       inp.connect(pre).connect(c).connect(mk).connect(ws).connect(hp).connect(lp).connect(dl).connect(out);
       const nz=ctx.createBufferSource();nz.buffer=crackle(5);nz.loop=true;const ng=G(0);nz.connect(ng).connect(out);nz.start();
-      u.apply=()=>{const p=u.p;pre.gain.value=1+p.comp*2.5;c.threshold.value=-8-p.comp*38;c.release.value=.04+p.pump*.45;mk.gain.value=1+p.comp*3.2;lp.frequency.setTargetAtTime(toneHz(p.tone),ctx.currentTime,.02);g1.gain.value=p.wow*.0022;g2.gain.value=p.wow*.00035;ng.gain.value=p.noise*.35};return out});
+      u.active=false;u.nl=0;u.setActive=a=>{u.active=a;ng.gain.setTargetAtTime(a?u.nl:0,ctx.currentTime,a?.05:.4)};
+      u.apply=()=>{const p=u.p;pre.gain.value=1+p.comp*2.5;c.threshold.value=-8-p.comp*38;c.release.value=.04+p.pump*.45;mk.gain.value=1+p.comp*3.2;lp.frequency.setTargetAtTime(toneHz(p.tone),ctx.currentTime,.02);g1.gain.value=p.wow*.0022;g2.gain.value=p.wow*.00035;u.nl=p.noise*.35;ng.gain.setTargetAtTime(u.active?u.nl:0,ctx.currentTime,.05)};return out});
   mkUnit('delay','Tape echo',{div:{label:'Time',opts:DIV.map((d,i)=>[String(i),d[0]]),v:'2'},fb:{label:'Feedback',max:.9,v:.38},tone:{label:'Tone',v:.45,fmt:v=>hz(echoHz(v))},mix:{label:'Mix',v:.3}},
     (inp,u)=>{const out=G(),d=ctx.createDelay(4),f=bq('lowpass',3000),ws=ctx.createWaveShaper(),fb=G(),wet=G();ws.curve=curve(1.2);
       inp.connect(out);inp.connect(d);d.connect(f).connect(ws).connect(fb).connect(d);ws.connect(wet).connect(out);
@@ -641,7 +642,11 @@ function bind(){
   addEventListener('keyup',e=>{if(e.key===' '&&!e.target.matches('input,select,textarea'))e.preventDefault();const i=KEYS.indexOf(e.key.toLowerCase());if(i>=0)release(S.bank*8+i)});
 }
 
-function frame(){const now=ctx.currentTime;let ch=false;while(SQ.q.length&&SQ.q[0].t<=now){SQ.cur=SQ.q.shift().i;ch=true}if(ch)markStep();
+let lastAct=-9;
+function busy(now){if(S.playing||(S.monitor&&IN.src)||R.state!=='idle')return true;for(const id in voices)for(const v of voices[id])if(v.t0<=now+.05&&(!v.ending||v.ending>now))return true;return false}
+function idleCheck(){const now=ctx.currentTime;if(busy(now))lastAct=now;const act=now-lastAct<1.2;if(U.dust&&U.dust.active!==act)U.dust.setActive(act)}
+setInterval(idleCheck,300);
+function frame(){const now=ctx.currentTime;idleCheck();let ch=false;while(SQ.q.length&&SQ.q[0].t<=now){SQ.cur=SQ.q.shift().i;ch=true}if(ch)markStep();
   if(needSeq){needSeq=false;renderSeq();renderLcd()}
   if(R.state==='bounce'&&now>R.t1+.25)endBounce();
   if(R.state!=='idle')recStat();
