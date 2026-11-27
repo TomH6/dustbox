@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 # Checks Dustbox the same way the CI does:
-# 1) every script in index.html exists and parses, 2) the page loads in headless Chrome without errors.
+# 1) every script in index.html (js/ and kits/) exists and parses, 2) the page loads in headless Chrome without errors.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
 echo "Checking scripts…"
-scripts=$(grep -o 'src="js/[^"]*"' index.html | sed 's/src="//;s/"$//')
+scripts=$(grep -oE 'src="(js|kits)/[^"]*"' index.html | sed 's/src="//;s/"$//')
 for f in $scripts; do
   [ -f "$f" ] || { echo "Missing: $f (listed in index.html)"; exit 1; }
   node --check "$f"
 done
-for f in js/*.js; do
+for f in js/*.js kits/*.js; do
   echo "$scripts" | grep -qx "$f" || { echo "Not loaded by index.html: $f"; exit 1; }
 done
 cat $scripts > /tmp/dustbox-all.js && node --check /tmp/dustbox-all.js

@@ -67,7 +67,7 @@ function bind(){
   $('#rAuto').onclick=()=>{S.auto=!S.auto;renderIn();save()};
   $('#rThr').addEventListener('input',e=>{S.thr=+e.target.value;$('#oThr').textContent=Math.round(20*Math.log10(S.thr))+' dB';save()});
   // project
-  $('#pjKit').onclick=()=>{pushUndo();loadKit(false);renderAll();save();toast('Starter kit loaded into bank A')};
+  $('#pjKit').onclick=()=>{pushUndo();const b=loadKit(false);renderAll();save();toast((b.length?`Starter kits loaded into bank${b.length>1?'s':''} ${b.join(' and ')}.`:'')+(b.length<KITS.length?' Banks that had your sounds were left alone.':''))};
   $('#pjNew').onclick=async()=>{if(!await ask('Start a new empty project? All pads and patterns are cleared. You can undo this until you reload the page.','Start new'))return;pushUndo();stopPlay();pads=Array(NP).fill(null);patterns=Array.from({length:8},newPat);S.bank=0;S.sel=0;S.pat=0;renderAll();save()};
   $('#midiOn').onclick=midiOn;
   // keyboard
