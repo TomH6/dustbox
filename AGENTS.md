@@ -24,7 +24,7 @@ Before you push, run the same check the CI runs:
 If you change the sequencer, the scheduler or playback, also run the sequencer test. It plays a pattern for a few bars in headless Chrome and checks that each pad fires on the right steps, that hits are scheduled ahead of time, that sound comes out, and that Stop silences it. It serves the folder itself and needs Node 22 or later and Chrome or Edge.
 
 ```sh
-node tools/seq-test.js            # options: --pattern 2, --bars 8, --shot playing.png, --chrome <path>
+node tools/seq-test.js            # options: --pattern 2, --bpm 100, --bars 8, --shot playing.png, --chrome <path>
 ```
 
 ## How the code is organised
@@ -55,10 +55,12 @@ node tools/seq-test.js            # options: --pattern 2, --bars 8, --shot playi
 
 The sampler code lives in `js/`, and the sounds live in `kits/`. Each kit file synthesizes its sounds in code and calls `addKit()` with:
 
+- `id`: a short fixed name, such as `gfunk-808`
 - `name`, `bank` (0 = A) and `pattern` (0 = pattern 1): where it goes
 - `keep`: when true, the Project tab button only fills the bank if it is empty, so it never replaces the user's sounds
 - `pads()`: returns up to 8 pads made with `mkPad()`
 - `beat()`: returns its pattern, made with `beat(bank, len, set => ...)`. Step values are 1 = hit, 2 = soft hit, 3 = roll (two 32nd-note hits in one step).
+- `regen(pad, bpm)` (optional): for a pad that holds a phrase, such as a melody, returns it re-synthesized at a new tempo. Give that pad `gen = {kit: id, pad: index, bpm}`. When the BPM changes, after undo and after loading, `retempo()` rebuilds any such pad whose `bpm` differs, so the phrase stays in time without changing pitch. Fit to tempo can't do this, because it changes the pitch.
 
 | File | Kit |
 |---|---|

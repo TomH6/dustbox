@@ -3,7 +3,7 @@
 // the right pads fire on the right steps, every hit is scheduled ahead of time,
 // sound comes out, Stop works and the sound dies away, and nothing logs an error.
 //
-// Usage: node tools/seq-test.js [--pattern 1] [--bars 4] [--chrome <path>] [--shot <file.png>]
+// Usage: node tools/seq-test.js [--pattern 1] [--bars 4] [--bpm 100] [--chrome <path>] [--shot <file.png>]
 // Needs Node 22+ (built-in fetch and WebSocket) and Chrome, Chromium or Edge.
 // Set CHROME to the browser's path if it isn't found automatically.
 const http = require('http'), fs = require('fs'), path = require('path'), os = require('os');
@@ -11,7 +11,7 @@ const { spawn } = require('child_process');
 
 const args = process.argv.slice(2);
 const opt = (name, def) => { const i = args.indexOf('--' + name); return i >= 0 ? args[i + 1] : def };
-const BARS = +opt('bars', 4), SHOT = opt('shot', null), PAT = +opt('pattern', 1) - 1;
+const BARS = +opt('bars', 4), SHOT = opt('shot', null), PAT = +opt('pattern', 1) - 1, BPM = opt('bpm', null);
 const ROOT = path.resolve(__dirname, '..');
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
@@ -44,7 +44,7 @@ async function main() {
   if (!chrome) { console.log('Chrome not found: set CHROME or pass --chrome <path>'); process.exit(2) }
   const srv = await serve(), url = `http://127.0.0.1:${srv.address().port}/`;
   const prof = fs.mkdtempSync(path.join(os.tmpdir(), 'dustbox-seq-'));
-  const ch = spawn(chrome, ['--headless=new', '--disable-gpu', '--no-sandbox', '--autoplay-policy=no-user-gesture-required',
+  const ch = spawn(chrome, ['--headless=new', '--disable-gpu', '--no-sandbox', '--mute-audio', '--autoplay-policy=no-user-gesture-required',
     '--remote-debugging-port=0', `--user-data-dir=${prof}`, '--window-size=1280,1000', 'about:blank'], { stdio: 'ignore' });
   const cleanup = () => { try { ch.kill() } catch { } srv.close(); setTimeout(() => { try { fs.rmSync(prof, { recursive: true, force: true }) } catch { } }, 500) };
 
@@ -78,6 +78,10 @@ async function main() {
     await send('Page.navigate', { url });
     for (let i = 0; i < 50; i++) { if (await ev(`typeof patterns!=='undefined'&&pads.some(Boolean)`).catch(() => false)) break; await sleep(100) }
 
+    // Change the tempo the way the BPM box does, and give phrase pads time to be re-synthesized.
+    if (BPM) { await ev(`setBpm(${+BPM})`); await sleep(800) }
+    const phrases = await ev(`pads.filter(p=>p&&p.gen).map(p=>({name:p.name,bpm:p.gen.bpm,dur:p.orig.duration}))`);
+
     // Log every trigger, and sample the peak level after the limiter every 10 ms.
     const info = await ev(`(()=>{S.pat=${PAT};S.bank=Math.floor(Object.keys(patterns[S.pat].steps)[0]/8)||0;renderAll();
       window.__hits=[];const orig=trigger;
@@ -109,6 +113,7 @@ async function main() {
     for (const r of info.rows) console.log(`  ${r.label.padEnd(3)} ${r.name.padEnd(10)} ${fmt(r.steps)}${info.mute[r.id] ? '  (muted)' : ''}`);
 
     check(info.ctxState === 'running', `the AudioContext is running (${info.ctxState})`);
+    if (phrases.length) check(phrases.every(p => p.bpm === info.bpm), `phrase pads follow the tempo: ` + phrases.map(p => `${p.name} made at ${p.bpm} BPM, ${p.dur.toFixed(2)} s`).join(', '));
     check(during.playing && during.btn === 'Stop', `while playing, the button reads "${during.btn}"`);
 
     // Expected hits for steps 0..nSteps-1. A step can land up to a swing or loose offset late, so the cutoff is just before step nSteps.
