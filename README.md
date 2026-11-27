@@ -12,4 +12,22 @@ An 8-pad phrase sampler that runs in the browser, inspired by the Boss SP-303 Dr
 - Resample, and bounce a pattern to a pad
 - Undo/redo, WAV export, MIDI input (notes 36–43), and autosave in the browser
 
-Everything runs in a single `index.html`, with no build step.
+It's plain HTML, CSS and JavaScript, with no build step.
+
+## Run it locally
+
+```sh
+python3 -m http.server 8000
+# open http://localhost:8000
+```
+
+## Project layout
+
+- `index.html`: the markup
+- `css/style.css`: all styles
+- `js/`: the app, split by area and loaded in order (see `AGENTS.md`)
+- `tools/check.sh`: the check that runs on every pull request
+
+## Working on it
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for how we work together, and [AGENTS.md](AGENTS.md) for how the code fits together. AI coding assistants also read `AGENTS.md`.
