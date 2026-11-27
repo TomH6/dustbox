@@ -21,6 +21,12 @@ Before you push, run the same check the CI runs:
 ./tools/check.sh
 ```
 
+If you change the sequencer, the scheduler or playback, also run the sequencer test. It plays a pattern for a few bars in headless Chrome and checks that each pad fires on the right steps, that hits are scheduled ahead of time, that sound comes out, and that Stop silences it. It serves the folder itself and needs Node 22 or later and Chrome or Edge.
+
+```sh
+node tools/seq-test.js            # options: --pattern 2, --bars 8, --shot playing.png, --chrome <path>
+```
+
 ## How the code is organised
 
 `index.html` holds the markup. `css/style.css` holds all styling. The JavaScript is split into files under `js/`, loaded as **classic scripts, in order**, at the end of `index.html`. They share one global scope: a `const` or `function` declared in an earlier file can be used in a later one. Keep the order in `index.html` the same as the list below. When you add a file, add a `<script>` tag in the right place.
@@ -33,7 +39,7 @@ Before you push, run the same check the CI runs:
 | `js/ui.js` | Undo/redo, `toast`, `ask`, and rendering of pads, the pad panel and the LCD |
 | `js/waveform.js` | Waveform drawing, the playhead and start/end dragging |
 | `js/files.js` | Loading audio files onto pads |
-| `js/sequencer.js` | The scheduler (lookahead), swing, live recording and grid rendering |
+| `js/sequencer.js` | The scheduler (lookahead), swing, rolls, live recording and grid rendering. Step values: 1 = hit, 2 = soft hit, 3 = roll (two 32nd-note hits in one step). |
 | `js/fx-panel.js` | The Effects tab UI |
 | `js/input.js` | Sound-card input, channel routing, monitoring and the meter |
 | `js/recording.js` | Record input, Resample and Bounce pattern |

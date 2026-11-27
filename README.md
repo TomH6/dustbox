@@ -8,7 +8,7 @@ An 8-pad phrase sampler that runs in the browser, inspired by the Boss SP-303 Dr
 - Waveform trimming, one-shot/gate/loop/reverse, Standard/Long 22k/Lo-fi 11k quality, pitch
 - Fit loops to tempo, and chop samples equally or on hits
 - Effects chain: Filter + drive, Isolator, Bit crusher, Dust comp (vinyl-style squash, crackle and wow), Tape echo, Reverb
-- Step sequencer: 8 patterns, swing, loose timing, live recording, and a metronome
+- Step sequencer: 8 patterns, swing, loose timing, rolls, live recording, and a metronome
 - Resample, and bounce a pattern to a pad
 - Undo/redo, WAV export, MIDI input (notes 36–43), and autosave in the browser
 
@@ -27,6 +27,7 @@ python3 -m http.server 8000
 - `css/style.css`: all styles
 - `js/`: the app, split by area and loaded in order (see `AGENTS.md`)
 - `tools/check.sh`: the check that runs on every pull request
+- `tools/seq-test.js`: plays the sequencer in headless Chrome and checks the timing and sound (`node tools/seq-test.js`)
 
 ## Working on it
 
