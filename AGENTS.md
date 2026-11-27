@@ -46,9 +46,26 @@ node tools/seq-test.js            # options: --pattern 2, --bars 8, --shot playi
 | `js/chop.js` | Equal chops and onset detection |
 | `js/export.js` | WAV encoding and downloads |
 | `js/storage.js` | Autosave and loading from IndexedDB |
-| `js/kit.js` | The synthesized starter kit and pattern |
+| `js/kit.js` | The kit engine: synthesis helpers (`synth`, `bp`, `mf`), `beat()` for building patterns, the kit list (`addKit`, `KITS`) and `loadKit()` |
+| `kits/*.js` | The kits themselves, one per file (see below). Loaded right after `js/kit.js`. |
 | `js/midi.js` | MIDI input |
 | `js/main.js` | Pad interaction, event bindings, the frame loop and startup. Always last. |
+
+## Kits
+
+The sampler code lives in `js/`, and the sounds live in `kits/`. Each kit file synthesizes its sounds in code and calls `addKit()` with:
+
+- `name`, `bank` (0 = A) and `pattern` (0 = pattern 1): where it goes
+- `keep`: when true, the Project tab button only fills the bank if it is empty, so it never replaces the user's sounds
+- `pads()`: returns up to 8 pads made with `mkPad()`
+- `beat()`: returns its pattern, made with `beat(bank, len, set => ...)`. Step values are 1 = hit, 2 = soft hit, 3 = roll (two 32nd-note hits in one step).
+
+| File | Kit |
+|---|---|
+| `kits/starter.js` | The starter kit on bank A, pattern 1 |
+| `kits/gfunk-808.js` | A G-funk kit with 808-style drums on bank B, pattern 2 |
+
+To add a kit, make a new file in `kits/`, give it a free bank and pattern, and add a `<script>` tag for it after the other kits in `index.html`.
 
 ## Rules that keep things working
 
